@@ -1,0 +1,10 @@
+pdfplumber
+langchain
+sentence-transformers
+faiss-cpu
+groq
+flask
+streamlit
+rank-bm25
+redis
+python-dotenv

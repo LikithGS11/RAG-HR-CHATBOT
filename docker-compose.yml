@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+
+  frontend:
+    image: python:3.9-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8501:8501"
+    command: sh -c "pip install -r requirements.txt && streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0"
+    depends_on:
+      - backend
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
