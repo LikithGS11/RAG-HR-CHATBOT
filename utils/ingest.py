@@ -1,6 +1,7 @@
 import pdfplumber
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import json
+import os
 
 def extract_text_from_pdf(pdf_path):
     text = ""
@@ -15,9 +16,12 @@ def chunk_text(text, chunk_size=1000, chunk_overlap=200):
     return chunks
 
 if __name__ == "__main__":
-    pdf_path = "data/HR-Policy.pdf"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(base_dir, '..', 'data')
+    pdf_path = os.path.join(data_dir, "HR-Policy.pdf")
     text = extract_text_from_pdf(pdf_path)
     chunks = chunk_text(text)
-    with open("hr_chunks.json", "w") as f:
+    out_path = os.path.join(data_dir, "hr_chunks.json")
+    with open(out_path, "w") as f:
         json.dump(chunks, f)
-    print("Chunks saved to hr_chunks.json")
+    print("Chunks saved to data/hr_chunks.json")
