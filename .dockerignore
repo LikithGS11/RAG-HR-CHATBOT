@@ -1,0 +1,18 @@
+# Keep the build context (and image) small and secret-free
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.git
+.gitignore
+.env
+*.log
+
+.mypy_cache/
+.pytest_cache/
+.DS_Store
+README.md
