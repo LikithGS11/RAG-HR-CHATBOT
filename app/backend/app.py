@@ -5,6 +5,8 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from groq import Groq
 import os
+import re
+import logging
 from dotenv import load_dotenv
 import uuid
 import time
@@ -12,7 +14,17 @@ from threading import Lock
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("anchor")
+
 app = Flask(__name__)
+
+
+def tokenize(text):
+    """Lowercase alphanumeric tokenization for BM25.
+    MUST stay identical to tokenize() in utils/faiss_index.py so the query and
+    the corpus are tokenized the same way."""
+    return re.findall(r"[a-z0-9]+", text.lower())
 
 # --- Configuration -----------------------------------------------------------
 MAX_QUERY_LENGTH = 2000            # reject oversized queries
@@ -100,8 +112,8 @@ def retrieve(query, top_k=5, candidate_pool=20):
     pool = min(candidate_pool, index.ntotal)
     distances, indices = index.search(query_emb, pool)
 
-    # BM25 scores across the whole corpus
-    tokenized_query = query.split()
+    # BM25 scores across the whole corpus (tokenized to match the index)
+    tokenized_query = tokenize(query)
     bm25_scores = bm25.get_scores(tokenized_query)
 
     # Union of candidates: top FAISS hits AND top BM25 hits, so neither
@@ -211,8 +223,9 @@ def query():
             max_tokens=800,
         )
         answer = response.choices[0].message.content
-    except Exception as e:
-        return jsonify({"error": f"LLM generation failed: {str(e)}"}), 500
+    except Exception:
+        logger.exception("LLM generation failed for session %s", session_id)
+        return jsonify({"error": "The assistant is temporarily unavailable. Please try again."}), 502
 
     # Persist the turn
     with chat_histories_lock:
