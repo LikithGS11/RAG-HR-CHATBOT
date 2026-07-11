@@ -1,0 +1,278 @@
+/* ============================================================================
+   HR Assistant — Design System
+   A premium, minimal dark UI. Indigo→violet identity, glass surfaces,
+   consistent tokens for color / spacing / radius / motion.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+:root {
+  /* Surfaces */
+  --bg:            #0a0b0f;
+  --surface:       rgba(255, 255, 255, 0.035);
+  --surface-2:     rgba(255, 255, 255, 0.055);
+  --surface-hover: rgba(255, 255, 255, 0.09);
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text */
+  --text:      #ECEEF3;
+  --text-dim:  #A6ACBB;
+  --text-muted:#6B7180;
+
+  /* Brand */
+  --accent:   #6366F1;
+  --accent-2: #A855F7;
+  --grad:      linear-gradient(135deg, #6366F1 0%, #8B5CF6 55%, #A855F7 100%);
+  --grad-soft: linear-gradient(135deg, rgba(99,102,241,.18), rgba(168,85,247,.16));
+
+  /* Feedback */
+  --ok:   #34D399;
+  --warn: #FBBF24;
+  --err:  #F87171;
+
+  /* Shape & motion */
+  --radius:    18px;
+  --radius-sm: 12px;
+  --radius-xs: 10px;
+  --shadow:        0 12px 40px -14px rgba(0,0,0,.7);
+  --shadow-accent: 0 10px 34px -10px rgba(99,102,241,.55);
+  --ring: 0 0 0 3px rgba(99,102,241,.32);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* ----- Base ---------------------------------------------------------------- */
+html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+[data-testid="stAppViewContainer"] {
+  background:
+    radial-gradient(1000px 560px at 12% -12%, rgba(99,102,241,.20), transparent 60%),
+    radial-gradient(900px 540px at 100% -6%,  rgba(168,85,247,.16), transparent 55%),
+    linear-gradient(180deg, #0a0b0f 0%, #0b0c12 45%, #08090d 100%);
+  color: var(--text);
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+a { color: var(--accent); text-decoration: none; }
+::selection { background: rgba(139, 92, 246, .35); }
+
+/* Hide default Streamlit chrome for a clean canvas */
+#MainMenu, footer, [data-testid="stStatusWidget"], [data-testid="stDecoration"] { display: none; }
+header[data-testid="stHeader"] { background: transparent; height: 0; }
+
+/* Reading-width main column, room for the floating composer */
+.block-container {
+  max-width: 880px;
+  padding-top: 2.2rem;
+  padding-bottom: 8rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); background-clip: padding-box; }
+
+/* ----- Sidebar ------------------------------------------------------------- */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, rgba(15,17,24,.92), rgba(9,10,14,.92));
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+}
+[data-testid="stSidebar"] .block-container { padding-top: 1.4rem; }
+
+.brand { display: flex; align-items: center; gap: .7rem; margin-bottom: 1.4rem; }
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 12px; flex: none;
+  background: var(--grad); box-shadow: var(--shadow-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.brand-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.05rem; line-height: 1.1; }
+.brand-sub  { color: var(--text-muted); font-size: .74rem; font-weight: 500; }
+
+.side-label {
+  color: var(--text-muted); font-size: .7rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; margin: 1.3rem 0 .5rem;
+}
+
+/* Status pill */
+.status-pill {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .45rem .8rem; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: .82rem; font-weight: 600; color: var(--text-dim);
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot.on  { background: var(--ok);  box-shadow: 0 0 0 4px rgba(52,211,153,.16); animation: pulse 2s infinite; }
+.status-dot.off { background: var(--err); box-shadow: 0 0 0 4px rgba(248,113,113,.16); }
+
+.topic { color: var(--text-dim); font-size: .9rem; padding: .35rem 0; display: flex; gap: .55rem; align-items: center; }
+.topic .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-2); flex: none; }
+
+.side-foot { color: var(--text-muted); font-size: .78rem; line-height: 1.6; margin-top: .5rem; }
+.side-foot b { color: var(--text-dim); }
+
+hr { border-color: var(--border); margin: 1.1rem 0; }
+
+/* ----- Buttons ------------------------------------------------------------- */
+.stButton > button {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .62rem 1rem;
+  font-weight: 600; font-size: .9rem;
+  text-align: left;
+  transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+}
+.stButton > button:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  color: var(--text);
+}
+.stButton > button:active { transform: translateY(0); }
+.stButton > button:focus { box-shadow: var(--ring); outline: none; }
+
+/* Primary (New chat) */
+.stButton > button[kind="primary"] {
+  background: var(--grad);
+  border: none;
+  color: #fff;
+  box-shadow: var(--shadow-accent);
+  text-align: center;
+}
+.stButton > button[kind="primary"]:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+/* ----- Hero / empty state -------------------------------------------------- */
+.hero { text-align: center; padding: 2.2rem 0 1.6rem; animation: fadeUp .6s var(--ease) both; }
+.hero-logo {
+  border-radius: 18px;
+  box-shadow: var(--shadow-accent);
+  margin-bottom: 1.3rem;
+  animation: float 4.5s ease-in-out infinite;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .35rem .8rem; border-radius: 999px; margin-bottom: 1.2rem;
+  background: var(--grad-soft); border: 1px solid rgba(139,92,246,.28);
+  color: #C7B8FF; font-size: .78rem; font-weight: 600;
+}
+.hero h1 {
+  font-size: 2.7rem; line-height: 1.08; margin: 0 0 .6rem;
+  background: linear-gradient(180deg, #fff 30%, #B9BEE0);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero h1 .grad {
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero p { color: var(--text-dim); font-size: 1.05rem; max-width: 30rem; margin: 0 auto; }
+.suggest-label { color: var(--text-muted); font-size: .74rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; text-align: center; margin: 1.8rem 0 .2rem; }
+
+/* Suggestion chips = buttons inside the hero columns */
+.hero-suggest .stButton > button {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: .85rem 1rem; min-height: 58px;
+  animation: fadeUp .6s var(--ease) both;
+}
+.hero-suggest .stButton > button:hover {
+  border-color: rgba(99,102,241,.5);
+  background: var(--grad-soft);
+}
+
+/* ----- Chat messages ------------------------------------------------------- */
+[data-testid="stChatMessage"] {
+  background: transparent;
+  padding: 0;
+  gap: .8rem;
+  margin-bottom: 1.15rem;
+  animation: msgIn .45s var(--ease) both;
+}
+[data-testid="stChatMessage"] img { border-radius: 10px; }
+
+/* the message body (child after the avatar) becomes the bubble */
+[data-testid="stChatMessage"] > div:last-child {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: .3rem 1.15rem;
+  box-shadow: var(--shadow);
+}
+[data-testid="stChatMessage"] > div:last-child p { color: var(--text); }
+
+/* user bubble — soft indigo tint (falls back gracefully if :has unsupported) */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:last-child {
+  background: var(--grad-soft);
+  border-color: rgba(99,102,241,.28);
+}
+
+/* ----- Sources expander ---------------------------------------------------- */
+[data-testid="stExpander"] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  margin-top: .4rem;
+}
+[data-testid="stExpander"] summary { font-size: .82rem; color: var(--text-dim); font-weight: 600; }
+[data-testid="stExpander"] summary:hover { color: var(--text); }
+.source-item {
+  display: flex; gap: .6rem; padding: .55rem 0; font-size: .84rem;
+  color: var(--text-dim); border-top: 1px solid var(--border); line-height: 1.55;
+}
+.source-item:first-child { border-top: none; }
+.source-tag {
+  flex: none; height: fit-content; padding: .1rem .5rem; border-radius: 6px;
+  background: var(--grad-soft); border: 1px solid rgba(139,92,246,.28);
+  color: #C7B8FF; font-size: .72rem; font-weight: 700;
+}
+
+/* ----- Composer (chat input) ---------------------------------------------- */
+[data-testid="stBottom"] { background: linear-gradient(to top, var(--bg) 45%, rgba(10,11,15,0)); }
+
+[data-testid="stChatInput"] {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+[data-testid="stChatInput"]:focus-within {
+  border-color: rgba(99,102,241,.6);
+  box-shadow: var(--ring), var(--shadow);
+}
+[data-testid="stChatInput"] textarea { color: var(--text); font-size: .95rem; }
+[data-testid="stChatInput"] textarea::placeholder { color: var(--text-muted); }
+[data-testid="stChatInput"] button { color: var(--accent); }
+
+/* ----- Typing indicator ---------------------------------------------------- */
+.typing { display: inline-flex; gap: .3rem; padding: .35rem .1rem; align-items: center; }
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  animation: bounce 1.3s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: .18s; }
+.typing span:nth-child(3) { animation-delay: .36s; }
+
+/* ----- Keyframes ----------------------------------------------------------- */
+@keyframes msgIn  { from { opacity: 0; transform: translateY(8px); }  to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(.6); opacity: .5; } 40% { transform: scale(1); opacity: 1; } }
+@keyframes pulse  { 0% { box-shadow: 0 0 0 0 rgba(52,211,153,.4); } 70% { box-shadow: 0 0 0 6px rgba(52,211,153,0); } 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); } }
+@keyframes float  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* ----- Responsive ---------------------------------------------------------- */
+@media (max-width: 640px) {
+  .block-container { padding-top: 1.4rem; }
+  .hero h1 { font-size: 2rem; }
+  .hero p { font-size: .95rem; }
+}
