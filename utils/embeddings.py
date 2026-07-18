@@ -6,8 +6,10 @@ import os
 def create_embeddings(chunks_file, models_dir, model_name='all-MiniLM-L6-v2'):
     with open(chunks_file, 'r') as f:
         chunks = json.load(f)
+    # Chunks are dicts: {"text": ..., "page": ...}. Encode only the text.
+    texts = [c["text"] for c in chunks]
     model = SentenceTransformer(model_name)
-    embeddings = model.encode(chunks)
+    embeddings = model.encode(texts)
     
     os.makedirs(models_dir, exist_ok=True)
     with open(os.path.join(models_dir, 'embeddings.pkl'), 'wb') as f:

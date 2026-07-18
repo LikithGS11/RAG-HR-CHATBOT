@@ -5,6 +5,7 @@ config & assets → styling → backend calls → state → sidebar → main vie
 """
 
 import base64
+import json
 import os
 import uuid
 
@@ -68,9 +69,6 @@ USER_AVATAR = _svg(
     "<path d='M8 33c0-6.5 5.4-9.5 12-9.5S32 26.5 32 33z' fill='#8B92A0'/></svg>"
 )
 
-TYPING_HTML = "<div class='typing'><span></span><span></span><span></span></div>"
-
-
 # ---------------------------------------------------------------------------
 # Page config — must be the first Streamlit call. Favicon = the robot mark.
 # ---------------------------------------------------------------------------
@@ -109,25 +107,41 @@ def backend_online() -> bool:
         return False
 
 
-def ask_backend(prompt: str, session_id: str) -> dict:
-    """Return {'answer', 'sources'}. Errors are surfaced as friendly answers."""
+def stream_backend(prompt: str, session_id: str):
+    """Stream a reply from /query/stream (NDJSON).
+
+    Yields text deltas; collects sources/errors on self. Falls back to a
+    friendly error message as a single yielded chunk."""
+    stream_backend.sources = []
+    stream_backend.error = None
     try:
         resp = requests.post(
-            f"{BACKEND_URL}/query",
+            f"{BACKEND_URL}/query/stream",
             json={"query": prompt, "session_id": session_id},
             timeout=REQUEST_TIMEOUT,
+            stream=True,
         )
-        if resp.status_code == 200:
-            data = resp.json()
-            return {"answer": data.get("answer", "No answer provided."),
-                    "sources": data.get("sources", [])}
         if resp.status_code == 429:
-            return {"answer": "⚠️ You're sending messages a little too fast — give me a moment and try again.", "sources": []}
-        return {"answer": "⚠️ Something went wrong on the server. Please try again shortly.", "sources": []}
+            yield "⚠️ You're sending messages a little too fast — give me a moment and try again."
+            return
+        if resp.status_code != 200:
+            yield "⚠️ Something went wrong on the server. Please try again shortly."
+            return
+        for line in resp.iter_lines(decode_unicode=True):
+            if not line:
+                continue
+            event = json.loads(line)
+            if event["type"] == "meta":
+                stream_backend.sources = event.get("sources", [])
+            elif event["type"] == "delta":
+                yield event["text"]
+            elif event["type"] == "error":
+                yield f"⚠️ {event.get('message', 'Something went wrong.')}"
+                return
     except requests.Timeout:
-        return {"answer": "⏳ That took longer than expected. Please try again.", "sources": []}
+        yield "⏳ That took longer than expected. Please try again."
     except requests.RequestException:
-        return {"answer": "🔌 I can't reach the backend right now. Make sure it's running and try again.", "sources": []}
+        yield "🔌 I can't reach the backend right now. Make sure it's running and try again."
 
 
 # ---------------------------------------------------------------------------
@@ -136,11 +150,16 @@ def ask_backend(prompt: str, session_id: str) -> dict:
 def render_sources(sources: list) -> None:
     if not sources:
         return
-    with st.expander(f"📄 {len(sources)} source passages"):
+    pages = sorted({s.get("page") for s in sources if s.get("page")})
+    label = f"📄 {len(sources)} source passages"
+    if pages:
+        label += " · page " + ", ".join(str(p) for p in pages)
+    with st.expander(label):
         for s in sources:
             snippet = " ".join(str(s.get("text", "")).split())[:340]
+            page = s.get("page", "?")
             st.markdown(
-                f"<div class='source-item'><span class='source-tag'>#{s.get('id', '?')}</span>"
+                f"<div class='source-item'><span class='source-tag'>p. {page}</span>"
                 f"<span>{snippet}…</span></div>",
                 unsafe_allow_html=True,
             )
@@ -241,14 +260,12 @@ def handle_turn(prompt: str) -> None:
     render_message({"role": "user", "content": prompt})
 
     with st.chat_message("assistant", avatar=BOT_AVATAR):
-        placeholder = st.empty()
-        placeholder.markdown(TYPING_HTML, unsafe_allow_html=True)
-        result = ask_backend(prompt, st.session_state.session_id)
-        placeholder.markdown(result["answer"])
-        render_sources(result["sources"])
+        answer = st.write_stream(stream_backend(prompt, st.session_state.session_id))
+        sources = stream_backend.sources
+        render_sources(sources)
 
     st.session_state.messages.append(
-        {"role": "assistant", "content": result["answer"], "sources": result["sources"]}
+        {"role": "assistant", "content": answer, "sources": sources}
     )
 
 

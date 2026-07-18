@@ -1,6 +1,5 @@
 import faiss
 import pickle
-import numpy as np
 import re
 from rank_bm25 import BM25Okapi
 import os
@@ -20,8 +19,8 @@ def tokenize(text):
 embeddings = pickle.load(open(os.path.join(models_dir, 'embeddings.pkl'), 'rb'))
 chunks = pickle.load(open(os.path.join(models_dir, 'chunks.pkl'), 'rb'))
 
-# Create BM25 index for re-ranking
-tokenized_chunks = [tokenize(chunk) for chunk in chunks]
+# Create BM25 index for re-ranking (chunks are {"text", "page"} dicts)
+tokenized_chunks = [tokenize(chunk["text"]) for chunk in chunks]
 bm25 = BM25Okapi(tokenized_chunks)
 pickle.dump(bm25, open(os.path.join(models_dir, 'bm25.pkl'), 'wb'))
 
